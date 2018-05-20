@@ -1,8 +1,11 @@
 package me.agaman.slackk.bot
 
 import com.google.gson.Gson
-import me.agaman.slackk.bot.event.*
+import me.agaman.slackk.bot.event.Event
+import me.agaman.slackk.bot.event.EventType
+import me.agaman.slackk.bot.event.UnknownEvent
 import me.agaman.slackk.bot.impl.ApiEventListener
+import org.reflections.Reflections
 
 private val gson = Gson()
 
@@ -34,16 +37,15 @@ class BotEventListener(
 
 
     private fun processEvent(jsonEventData: String) : Event {
-        val type = gson.fromJson(jsonEventData, EventType::class.java).type
-        return when (type) {
-            "hello" -> gson.fromJson(jsonEventData, HelloEvent::class.java)
-            "im_created" -> gson.fromJson(jsonEventData, ImCreatedEvent::class.java)
-            "message" -> gson.fromJson(jsonEventData, MessageEvent::class.java)
-            else -> UnknownEvent(type, jsonEventData)
-        }
+        val type = gson.fromJson(jsonEventData, EventTypeReader::class.java).type
+        return Reflections("me.agaman")
+                .getSubTypesOf(Event::class.java)
+                .filter { it.getAnnotation(EventType::class.java)?.value == type }
+                .map { gson.fromJson(jsonEventData, it) }
+                .firstOrNull() ?: UnknownEvent(type, jsonEventData)
     }
 
-    private data class EventType(
+    private data class EventTypeReader(
             val type: String
     )
 }

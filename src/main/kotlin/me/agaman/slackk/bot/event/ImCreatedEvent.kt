@@ -1,5 +1,6 @@
 package me.agaman.slackk.bot.event
 
+@EventType("im_created")
 data class ImCreatedEvent(
         val user: String,
         val event_ts: String,
