@@ -6,6 +6,7 @@ import me.agaman.slackk.bot.event.EventType
 import me.agaman.slackk.bot.event.UnknownEvent
 import me.agaman.slackk.bot.impl.ApiEventListener
 import org.reflections.Reflections
+import org.reflections.util.ConfigurationBuilder
 
 private val gson = Gson()
 
@@ -38,7 +39,7 @@ class BotEventListener(
 
     private fun processEvent(jsonEventData: String) : Event {
         val type = gson.fromJson(jsonEventData, EventTypeReader::class.java).type
-        return Reflections("me.agaman")
+        return Reflections(ConfigurationBuilder.build())
                 .getSubTypesOf(Event::class.java)
                 .filter { it.getAnnotation(EventType::class.java)?.value == type }
                 .map { gson.fromJson(jsonEventData, it) }
