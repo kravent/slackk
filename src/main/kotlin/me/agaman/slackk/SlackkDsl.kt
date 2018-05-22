@@ -16,6 +16,7 @@ class SlackkDsl(
     fun schedule(schedule: String, task: () -> Unit) = bot.schedule(schedule, task)
     fun onInterval(secondsInterval: Long, task: () -> Unit) = bot.addTimer(secondsInterval, TimeUnit.SECONDS, task)
 
+    fun onStart(listener: () -> Unit) = bot.onStart(listener)
     fun onEvent(listener: (Event) -> Unit) = bot.onAnyEvent(listener)
     fun onUserMessage(listener: (MessageEvent) -> Unit) = bot.onEvent<MessageEvent> {
         if(it.user != null && it.user != bot.selfUser)

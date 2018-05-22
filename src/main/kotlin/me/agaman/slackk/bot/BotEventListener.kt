@@ -21,39 +21,39 @@ class BotEventListener(
             .groupBy { (_, annotation) -> annotation.value }
             .mapValues {(_, classes) -> classes.sortedBy { (_, annotation) -> annotation.priority }.last().first }
 
+    private var startListeners: MutableList<() -> Unit> = mutableListOf()
     private var eventListeners: MutableList<(Event) -> Unit> = mutableListOf()
 
     init {
-        apiEventListener.onMessage(this::processEvent)
+        apiEventListener.onStarted { startListeners.forEach { it() } }
+        apiEventListener.onMessage { jsonEventData ->
+            val event = mapToEvent(jsonEventData)
+            eventListeners.forEach { it(event) }
+        }
     }
 
 
     val selfUser get() = apiEventListener.selfUser
 
-    fun onStarted(listener: () -> Unit) {
+    fun addStartListener(listener: () -> Unit) {
         apiEventListener.onStarted(listener)
     }
 
-    inline fun <reified T: Event> addListener(crossinline listener: (T) -> Unit) {
-        addListenerForAnyEvent({ event ->
+    inline fun <reified T: Event> addEventListener(crossinline listener: (T) -> Unit) {
+        addAnyEventListener { event ->
             if (event is T) {
                 listener(event)
             }
-        })
+        }
     }
 
-    fun addListenerForAnyEvent(listener: (Event) -> Unit) {
+    fun addAnyEventListener(listener: (Event) -> Unit) {
         eventListeners.add(listener)
     }
 
     fun start() = apiEventListener.start()
     fun stop() = apiEventListener.stop()
 
-
-    private fun processEvent(jsonEventData: String) {
-        val event = mapToEvent(jsonEventData)
-        eventListeners.forEach { it(event) }
-    }
 
     private fun mapToEvent(jsonEventData: String) : Event {
         val type = gson.fromJson(jsonEventData, EventTypeReader::class.java).type

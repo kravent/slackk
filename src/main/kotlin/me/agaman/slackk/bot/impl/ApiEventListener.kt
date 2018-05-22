@@ -1,13 +1,10 @@
 package me.agaman.slackk.bot.impl
 
-import com.google.gson.Gson
 import me.agaman.slackk.bot.BotClient
 import me.agaman.slackk.bot.request.RtmConnectRequest
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
-
-private val gson = Gson()
 
 class ApiEventListener(
         token: String

@@ -19,15 +19,16 @@ class Bot(
     val selfUser get() = eventListener.selfUser
 
     init {
-        eventListener.onStarted { scheduler.start() }
+        eventListener.addStartListener { scheduler.start() }
     }
 
     inline fun <reified T : Any> send(request: Request<T>) : T = send(request, T::class)
     @PublishedApi
     internal fun <T : Any> send(request: Request<T>, resultClass: KClass<T>) : T = client.send(request, resultClass)
 
-    inline fun <reified T : Event> onEvent(crossinline listener: (T) -> Unit) = eventListener.addListener(listener)
-    fun onAnyEvent(listener: (Event) -> Unit) = eventListener.addListenerForAnyEvent(listener)
+    fun onStart(listener: () -> Unit) = eventListener.addStartListener(listener)
+    inline fun <reified T : Event> onEvent(crossinline listener: (T) -> Unit) = eventListener.addEventListener(listener)
+    fun onAnyEvent(listener: (Event) -> Unit) = eventListener.addAnyEventListener(listener)
 
     fun schedule(schedule: String, task: () -> Unit) = scheduler.addScheduler(schedule, task)
     fun addTimer(secondsInterval: Long, intervalUnit: TimeUnit, task: () -> Unit) = scheduler.addTimer(secondsInterval, intervalUnit, task)
