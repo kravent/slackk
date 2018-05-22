@@ -21,6 +21,12 @@ class BotEventListener(
             .groupBy { (_, annotation) -> annotation.value }
             .mapValues {(_, classes) -> classes.sortedBy { (_, annotation) -> annotation.priority }.last().first }
 
+    private var eventListeners: MutableList<(Event) -> Unit> = mutableListOf()
+
+    init {
+        apiEventListener.onMessage(this::processEvent)
+    }
+
 
     val selfUser get() = apiEventListener.selfUser
 
@@ -37,14 +43,19 @@ class BotEventListener(
     }
 
     fun addListenerForAnyEvent(listener: (Event) -> Unit) {
-        apiEventListener.addListener { listener(processEvent(it)) }
+        eventListeners.add(listener)
     }
 
     fun start() = apiEventListener.start()
     fun stop() = apiEventListener.stop()
 
 
-    private fun processEvent(jsonEventData: String) : Event {
+    private fun processEvent(jsonEventData: String) {
+        val event = mapToEvent(jsonEventData)
+        eventListeners.forEach { it(event) }
+    }
+
+    private fun mapToEvent(jsonEventData: String) : Event {
         val type = gson.fromJson(jsonEventData, EventTypeReader::class.java).type
         return eventClassForType[type]?.let { gson.fromJson(jsonEventData, it) } ?: UnknownEvent(type, jsonEventData)
     }

@@ -17,7 +17,7 @@ class ApiEventListener(
     private var webSocket: WebSocket? = null
     private var user: String? = null
     private var startedListener: (() -> Unit)? = null
-    private var messageListeners: MutableList<(String) -> Unit> = mutableListOf()
+    private var messageListener: ((String) -> Unit)? = null
 
     val selfUser: String? get() = user
 
@@ -25,8 +25,8 @@ class ApiEventListener(
         startedListener = listener
     }
 
-    fun addListener(listener: (String) -> Unit) {
-        messageListeners.add(listener)
+    fun onMessage(listener: (String) -> Unit) {
+        messageListener = listener
     }
 
     fun start() {
@@ -38,7 +38,7 @@ class ApiEventListener(
                 .build()
         val listener = WebSocketListenerWrapper(
                 onOpen = { startedListener?.let { it() } },
-                onMessage = { text ->  messageListeners.forEach { listener -> listener(text) } }
+                onMessage = { text -> messageListener?.let { it(text) } }
         )
         webSocket = httpClient.newWebSocket(request, listener)
     }
