@@ -14,6 +14,13 @@ class BotEventListener(
         token: String
 ) {
     private val apiEventListener = ApiEventListener(token)
+    private val eventClassForType: Map<String, Class<out Event>> = Reflections(ConfigurationBuilder.build())
+            .getSubTypesOf(Event::class.java)
+            .map { Pair(it, it.getAnnotation(EventType::class.java)) }
+            .filter { (_, annotation) -> annotation != null }
+            .groupBy { (_, annotation) -> annotation.value }
+            .mapValues {(_, classes) -> classes.sortedBy { (_, annotation) -> annotation.priority }.last().first }
+
 
     val selfUser get() = apiEventListener.selfUser
 
@@ -39,11 +46,7 @@ class BotEventListener(
 
     private fun processEvent(jsonEventData: String) : Event {
         val type = gson.fromJson(jsonEventData, EventTypeReader::class.java).type
-        return Reflections(ConfigurationBuilder.build())
-                .getSubTypesOf(Event::class.java)
-                .filter { it.getAnnotation(EventType::class.java)?.value == type }
-                .map { gson.fromJson(jsonEventData, it) }
-                .firstOrNull() ?: UnknownEvent(type, jsonEventData)
+        return eventClassForType[type]?.let { gson.fromJson(jsonEventData, it) } ?: UnknownEvent(type, jsonEventData)
     }
 
     private data class EventTypeReader(
