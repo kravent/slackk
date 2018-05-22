@@ -6,7 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
 
-class ApiEventListener(
+internal class ApiEventListener(
         token: String
 ) {
     private val botClient = BotClient(token)

@@ -5,7 +5,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 
-class ApiClient(
+internal class ApiClient(
         private val token: String
 ) {
     private val httpClient = OkHttpClient()

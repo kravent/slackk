@@ -4,7 +4,7 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
-class WebSocketListenerWrapper(
+internal class WebSocketListenerWrapper(
         private var onOpen: (() -> Unit)? = null,
         private var onMessage: ((String) -> Unit)? = null,
         private var onClosing: (() -> Unit)? = null,

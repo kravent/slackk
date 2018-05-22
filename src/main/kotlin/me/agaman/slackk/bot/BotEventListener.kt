@@ -8,11 +8,13 @@ import me.agaman.slackk.bot.impl.ApiEventListener
 import org.reflections.Reflections
 import org.reflections.util.ConfigurationBuilder
 
-private val gson = Gson()
-
 class BotEventListener(
         token: String
 ) {
+    companion object {
+        private val gson = Gson()
+    }
+
     private val apiEventListener = ApiEventListener(token)
     private val eventClassForType: Map<String, Class<out Event>> = Reflections(ConfigurationBuilder.build())
             .getSubTypesOf(Event::class.java)

@@ -5,9 +5,11 @@ import java.time.ZonedDateTime
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-private val CORE_POOL_SIZE = 1
+internal class Scheduler {
+    companion object {
+        private const val CORE_POOL_SIZE = 1
+    }
 
-class Scheduler {
     private val executor = ScheduledThreadPoolExecutor(CORE_POOL_SIZE).apply {
         continueExistingPeriodicTasksAfterShutdownPolicy = false
         executeExistingDelayedTasksAfterShutdownPolicy = false

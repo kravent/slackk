@@ -5,11 +5,13 @@ import me.agaman.slackk.bot.impl.ApiClient
 import me.agaman.slackk.bot.request.Request
 import kotlin.reflect.KClass
 
-private val gson = Gson()
-
 class BotClient(
         token: String
 ) {
+    companion object {
+        private val gson = Gson()
+    }
+
     private val apiClient = ApiClient(token)
 
     inline fun <reified T : Any> send(request: Request<T>) : T = send(request, T::class)
