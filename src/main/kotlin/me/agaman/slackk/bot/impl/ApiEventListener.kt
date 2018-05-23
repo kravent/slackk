@@ -27,7 +27,7 @@ internal class ApiEventListener(
     }
 
     fun start() {
-        val rtmResult = botClient.send(RtmConnectRequest())
+        val rtmResult = botClient.send(RtmConnectRequest()).get()
         user = rtmResult.self.id
 
         val request = Request.Builder()

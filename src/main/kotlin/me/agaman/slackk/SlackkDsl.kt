@@ -6,6 +6,7 @@ import me.agaman.slackk.bot.event.MessageEvent
 import me.agaman.slackk.bot.request.PostMessageRequest
 import me.agaman.slackk.bot.request.Request
 import me.agaman.slackk.bot.result.PostMessageResult
+import me.agaman.slackk.bot.result.Result
 import java.util.concurrent.TimeUnit
 
 class SlackkDsl(
@@ -23,8 +24,8 @@ class SlackkDsl(
             listener(it)
     }
 
-    inline fun <reified T : Any> send(request: Request<T>) : T = bot.send(request)
-    fun sendMessage(channel: String, text: String, asUser: Boolean = true) : PostMessageResult =
+    inline fun <reified T : Any> send(request: Request<T>) : Result<T> = bot.send(request)
+    fun sendMessage(channel: String, text: String, asUser: Boolean = true) : Result<PostMessageResult> =
             bot.send(PostMessageRequest(channel = channel, text = text, asUser = asUser))
 
     fun start() = bot.start()
