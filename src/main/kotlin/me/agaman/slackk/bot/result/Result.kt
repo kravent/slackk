@@ -12,13 +12,17 @@ data class Result<T>(
     }
 
     fun isSuccess() = result != null
-    fun get() : T = result ?: throw SlackkResultError(error ?: "")
+    fun get() : T = result ?: throw createThrowable()
+    fun throwIfError() { get() }
+
     fun success(job: (T) -> Unit) : Result<T> {
         result?.let { job(it) }
         return this
     }
-    fun error(job: (String) -> Unit) : Result<T> {
-        error?.let { job(it) }
+    fun error(job: (SlackkResultError) -> Unit) : Result<T> {
+        error?.let { job(createThrowable()) }
         return this
     }
+
+    private fun createThrowable() = SlackkResultError(error ?: "")
 }

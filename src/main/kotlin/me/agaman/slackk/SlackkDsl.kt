@@ -18,7 +18,8 @@ class SlackkDsl(
     fun onInterval(secondsInterval: Long, task: () -> Unit) = bot.addTimer(secondsInterval, TimeUnit.SECONDS, task)
 
     fun onStart(listener: () -> Unit) = bot.onStart(listener)
-    fun onEvent(listener: (Event) -> Unit) = bot.onAnyEvent(listener)
+    inline fun <reified T : Event> onEvent(crossinline listener: (T) -> Unit) = bot.onEvent(listener)
+    fun onAnyEvent(listener: (Event) -> Unit) = bot.onAnyEvent(listener)
     fun onUserMessage(listener: (MessageEvent) -> Unit) = bot.onEvent<MessageEvent> {
         if(it.user != null && it.user != bot.selfUser)
             listener(it)
