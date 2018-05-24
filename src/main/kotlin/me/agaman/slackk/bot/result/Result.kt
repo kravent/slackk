@@ -2,7 +2,7 @@ package me.agaman.slackk.bot.result
 
 import me.agaman.slackk.bot.exception.SlackkResultError
 
-class Result<T>(
+data class Result<T>(
         private val result: T?,
         private val error: String?
 ) {
