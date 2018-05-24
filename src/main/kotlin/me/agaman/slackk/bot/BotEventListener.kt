@@ -37,7 +37,7 @@ class BotEventListener(
     val selfUser get() = apiEventListener.selfUser
 
     fun addStartListener(listener: () -> Unit) {
-        apiEventListener.onStarted(listener)
+        startListeners.add(listener)
     }
 
     inline fun <reified T: Event> addEventListener(crossinline listener: (T) -> Unit) {
