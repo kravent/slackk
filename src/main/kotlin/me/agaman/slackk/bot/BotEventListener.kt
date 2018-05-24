@@ -6,7 +6,6 @@ import me.agaman.slackk.bot.event.EventType
 import me.agaman.slackk.bot.event.UnknownEvent
 import me.agaman.slackk.bot.impl.ApiEventListener
 import org.reflections.Reflections
-import org.reflections.util.ConfigurationBuilder
 
 class BotEventListener(
         token: String
@@ -16,7 +15,7 @@ class BotEventListener(
     }
 
     private val apiEventListener = ApiEventListener(token)
-    private val eventClassForType: Map<String, Class<out Event>> = Reflections(ConfigurationBuilder.build())
+    private val eventClassForType: Map<String, Class<out Event>> = Reflections("me.agaman.slackk")
             .getSubTypesOf(Event::class.java)
             .map { Pair(it, it.getAnnotation(EventType::class.java)) }
             .filter { (_, annotation) -> annotation != null }
