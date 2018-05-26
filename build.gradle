@@ -26,6 +26,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.github.shyiko.skedule:skedule:0.3.0'
     compile 'org.reflections:reflections:0.9.11'
+    compile 'io.github.microutils:kotlin-logging:1.5.4'
 }
 
 compileKotlin {

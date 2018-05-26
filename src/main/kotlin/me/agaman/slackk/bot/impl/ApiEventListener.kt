@@ -19,11 +19,11 @@ internal class ApiEventListener(
     val selfUser: String? get() = user
 
     fun onStarted(listener: () -> Unit) {
-        startedListener = listener
+        startedListener = addErrorHandler(listener)
     }
 
     fun onMessage(listener: (String) -> Unit) {
-        messageListener = listener
+        messageListener = addErrorHandler(listener)
     }
 
     fun start() {

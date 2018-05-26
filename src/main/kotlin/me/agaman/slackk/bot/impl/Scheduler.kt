@@ -21,11 +21,11 @@ internal class Scheduler {
 
 
     fun addScheduler(schedule: String, task: () -> Unit) {
-        scheduledTasks += createScheduledTask(schedule, task)
+        scheduledTasks += createScheduledTask(schedule, addErrorHandler(task))
     }
 
     fun addTimer(interval: Long, intervalUnit: TimeUnit, task: () -> Unit) {
-        timedTasks += TimedTask(interval, intervalUnit, task)
+        timedTasks += TimedTask(interval, intervalUnit, addErrorHandler(task))
     }
 
     fun start() {
