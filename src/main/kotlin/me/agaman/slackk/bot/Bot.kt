@@ -1,5 +1,6 @@
 package me.agaman.slackk.bot
 
+import com.github.shyiko.skedule.Schedule
 import me.agaman.slackk.bot.event.Event
 import me.agaman.slackk.bot.impl.Scheduler
 import me.agaman.slackk.bot.request.Request
@@ -34,7 +35,7 @@ class Bot(
     /**
      * Reference for schedule values: <a href="https://github.com/shyiko/skedule#format">skedule</a>.
      */
-    fun schedule(schedule: String, task: () -> Unit) = scheduler.addScheduler(schedule, task)
+    fun schedule(schedule: String, task: () -> Unit) = scheduler.addScheduler(Schedule.parse(schedule), task)
     fun addTimer(secondsInterval: Long, intervalUnit: TimeUnit, task: () -> Unit) = scheduler.addTimer(secondsInterval, intervalUnit, task)
 
     fun start() {
