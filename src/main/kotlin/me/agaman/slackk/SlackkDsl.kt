@@ -1,6 +1,7 @@
 package me.agaman.slackk
 
 import me.agaman.slackk.bot.Bot
+import me.agaman.slackk.bot.data.Message
 import me.agaman.slackk.bot.event.Event
 import me.agaman.slackk.bot.event.MessageEvent
 import me.agaman.slackk.bot.request.PostMessageRequest
@@ -24,8 +25,13 @@ class SlackkDsl(
     inline fun <reified T : Event> onEvent(crossinline listener: (T) -> Unit) = bot.onEvent(listener)
     fun onAnyEvent(listener: (Event) -> Unit) = bot.onAnyEvent(listener)
     fun onUserMessage(listener: (MessageEvent) -> Unit) = bot.onEvent<MessageEvent> {
-        if(it.user != null && it.user != bot.selfUser)
+        if(it.subtype == null && it.user != bot.selfUser)
             listener(it)
+    }
+    fun onUserMessageEdited(listener: (oldMessage: Message, newMessage: Message) -> Unit) = bot.onEvent<MessageEvent> {
+        if (it.subtype == "message_changed" && it.user != bot.selfUser) {
+            listener(it.previousMessage, it.message)
+        }
     }
 
     inline fun <reified T : Any> send(request: Request<T>) : Result<T> = bot.send(request)
