@@ -1,5 +1,6 @@
 package me.agaman.slackk.bot.impl
 
+import kotlinx.coroutines.experimental.Job
 import me.agaman.slackk.bot.BotClient
 import me.agaman.slackk.bot.request.RtmConnectRequest
 import okhttp3.OkHttpClient
@@ -13,17 +14,17 @@ internal class ApiEventListener(
     private val httpClient = OkHttpClient()
     private var webSocket: WebSocket? = null
     private var user: String? = null
-    private var startedListener: (() -> Unit)? = null
-    private var messageListener: ((String) -> Unit)? = null
+    private var startedListener: (() -> Job)? = null
+    private var messageListener: ((String) -> Job)? = null
 
     val selfUser: String? get() = user
 
-    fun onStarted(listener: () -> Unit) {
-        startedListener = addErrorHandler(listener)
+    fun onStarted(callback: () -> Unit) {
+        startedListener = wrapSlackkCallback(callback)
     }
 
-    fun onMessage(listener: (String) -> Unit) {
-        messageListener = addErrorHandler(listener)
+    fun onMessage(callback: (String) -> Unit) {
+        messageListener = wrapSlackkCallback(callback)
     }
 
     fun start() {

@@ -1,6 +1,7 @@
 package me.agaman.slackk.bot.impl
 
 import com.github.shyiko.skedule.Schedule
+import kotlinx.coroutines.experimental.Job
 import java.time.ZonedDateTime
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -23,12 +24,12 @@ internal class Scheduler {
     /**
      * Reference for schedule values: <a href="https://github.com/shyiko/skedule#format">skedule</a>.
      */
-    fun addScheduler(schedule: String, task: () -> Unit) {
-        scheduledTasks += createScheduledTask(schedule, addErrorHandler(task))
+    fun addScheduler(schedule: String, callback: () -> Unit) {
+        scheduledTasks += createScheduledTask(schedule, wrapSlackkCallback(callback))
     }
 
-    fun addTimer(interval: Long, intervalUnit: TimeUnit, task: () -> Unit) {
-        timedTasks += TimedTask(interval, intervalUnit, addErrorHandler(task))
+    fun addTimer(interval: Long, intervalUnit: TimeUnit, callback: () -> Unit) {
+        timedTasks += TimedTask(interval, intervalUnit, wrapSlackkCallback(callback))
     }
 
     fun start() {
@@ -45,11 +46,11 @@ internal class Scheduler {
     }
 
 
-    private fun createScheduledTask(schedule: String, job: () -> Unit) : ScheduledTask {
+    private fun createScheduledTask(schedule: String, callback: () -> Job) : ScheduledTask {
         val task = ScheduledTask(Schedule.parse(schedule))
-        task.task = {
+        task.callback = {
             scheduleNextTask(task)
-            job()
+            callback()
         }
         return task
     }
@@ -60,11 +61,11 @@ internal class Scheduler {
     }
 
     private fun scheduleNextTask(task: ScheduledTask) {
-        executor.schedule(task.task!!, task.scheduleIterator!!.next().toEpochSecond() - now().toEpochSecond(), TimeUnit.SECONDS)
+        executor.schedule(task.callback!!, task.scheduleIterator!!.next().toEpochSecond() - now().toEpochSecond(), TimeUnit.SECONDS)
     }
 
     private fun startTimer(task: TimedTask) {
-        executor.scheduleAtFixedRate(task.task, task.interval, task.interval, task.intervalUnit)
+        executor.scheduleAtFixedRate({ task.callback() }, task.interval, task.interval, task.intervalUnit)
     }
 
     private fun now() = ZonedDateTime.now()
@@ -72,12 +73,12 @@ internal class Scheduler {
     private data class ScheduledTask(
             val schedule: Schedule,
             var scheduleIterator: Schedule.ScheduleIterator<ZonedDateTime>? = null,
-            var task: (() -> Unit)? = null
+            var callback: (() -> Unit)? = null
     )
 
     private data class TimedTask(
             val interval: Long,
             val intervalUnit: TimeUnit,
-            val task: () -> Unit
+            val callback: () -> Job
     )
 }
