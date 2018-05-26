@@ -25,11 +25,11 @@ internal class Scheduler {
      * Reference for schedule values: <a href="https://github.com/shyiko/skedule#format">skedule</a>.
      */
     fun addScheduler(schedule: String, callback: () -> Unit) {
-        scheduledTasks += createScheduledTask(schedule, wrapSlackkCallback(callback))
+        scheduledTasks += createScheduledTask(schedule, Coroutines.wrapCallback(callback))
     }
 
     fun addTimer(interval: Long, intervalUnit: TimeUnit, callback: () -> Unit) {
-        timedTasks += TimedTask(interval, intervalUnit, wrapSlackkCallback(callback))
+        timedTasks += TimedTask(interval, intervalUnit, Coroutines.wrapCallback(callback))
     }
 
     fun start() {

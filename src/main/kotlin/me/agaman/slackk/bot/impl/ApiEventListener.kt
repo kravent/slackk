@@ -20,11 +20,11 @@ internal class ApiEventListener(
     val selfUser: String? get() = user
 
     fun onStarted(callback: () -> Unit) {
-        startedListener = wrapSlackkCallback(callback)
+        startedListener = Coroutines.wrapCallback(callback)
     }
 
     fun onMessage(callback: (String) -> Unit) {
-        messageListener = wrapSlackkCallback(callback)
+        messageListener = Coroutines.wrapCallback(callback)
     }
 
     fun start() {
