@@ -31,6 +31,9 @@ class Bot(
     inline fun <reified T : Event> onEvent(crossinline listener: (T) -> Unit) = eventListener.addEventListener(listener)
     fun onAnyEvent(listener: (Event) -> Unit) = eventListener.addAnyEventListener(listener)
 
+    /**
+     * Reference for schedule values: <a href="https://github.com/shyiko/skedule#format">skedule</a>.
+     */
     fun schedule(schedule: String, task: () -> Unit) = scheduler.addScheduler(schedule, task)
     fun addTimer(secondsInterval: Long, intervalUnit: TimeUnit, task: () -> Unit) = scheduler.addTimer(secondsInterval, intervalUnit, task)
 

@@ -14,6 +14,9 @@ class SlackkDsl(
 ) {
     val bot = Bot(token)
 
+    /**
+     * Reference for schedule values: <a href="https://github.com/shyiko/skedule#format">skedule</a>.
+     */
     fun schedule(schedule: String, task: () -> Unit) = bot.schedule(schedule, task)
     fun onInterval(secondsInterval: Long, task: () -> Unit) = bot.addTimer(secondsInterval, TimeUnit.SECONDS, task)
 

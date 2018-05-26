@@ -20,6 +20,9 @@ internal class Scheduler {
     private var started = false
 
 
+    /**
+     * Reference for schedule values: <a href="https://github.com/shyiko/skedule#format">skedule</a>.
+     */
     fun addScheduler(schedule: String, task: () -> Unit) {
         scheduledTasks += createScheduledTask(schedule, addErrorHandler(task))
     }
