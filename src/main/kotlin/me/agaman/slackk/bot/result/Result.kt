@@ -13,6 +13,7 @@ data class Result<T>(
 
     fun isSuccess() = result != null
     fun get() : T = result ?: throw createThrowable()
+    fun getOrNull() : T? = result
     fun throwIfError() { get() }
 
     fun success(job: (T) -> Unit) : Result<T> {
