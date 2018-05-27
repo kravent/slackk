@@ -1,18 +1,19 @@
 package me.agaman.slackk.bot.impl
 
 import com.github.shyiko.skedule.Schedule
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.cancelAndJoin
+import kotlinx.coroutines.experimental.ThreadPoolDispatcher
+import kotlinx.coroutines.experimental.cancel
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.sync.Mutex
+import kotlinx.coroutines.experimental.sync.withLock
 import java.util.concurrent.TimeUnit
 
 internal class Scheduler {
     private val tasks: MutableList<Task> = mutableListOf()
 
-    private val schedulerContext = newSingleThreadContext("slackk-scheduler")
-    private val jobs: MutableList<Job> = mutableListOf()
-    private var started = false
+    private val mutex = Mutex()
+    private var schedulerContext: ThreadPoolDispatcher? = null
 
     fun addScheduler(schedule: Schedule, callback: () -> Unit) =
             addTask(ScheduledTask(schedule, Coroutines.wrapCallback(callback)))
@@ -21,30 +22,36 @@ internal class Scheduler {
             addTask(TimedTask(interval, intervalUnit, Coroutines.wrapCallback(callback)))
 
     fun start() {
-        runBlocking(schedulerContext) {
-            if (!started) {
-                tasks.forEach(::startTask)
-                started = true
-            }
+        lockRun {
+            schedulerContext = newSingleThreadContext("slackk-scheduler")
+            tasks.forEach(::startTask)
         }
     }
 
     fun stop() {
-        runBlocking(schedulerContext) {
-            jobs.forEach { it.cancelAndJoin() }
-            jobs.clear()
-            started = false
+        lockRun {
+            schedulerContext?.cancel()
+            schedulerContext?.close()
+            schedulerContext = null
         }
     }
 
     private fun addTask(task: Task) {
-        runBlocking(schedulerContext) {
-            tasks += task
-            if (started) startTask(task)
-        }
+        tasks += task
+        startTask(task)
     }
 
     private fun startTask(task: Task) {
-        jobs += task.run(schedulerContext)
+        lockRun {
+            schedulerContext?.let { task.run(it) }
+        }
+    }
+
+    private fun lockRun(job: suspend () -> Unit) {
+        runBlocking {
+            mutex.withLock {
+                job()
+            }
+        }
     }
 }
