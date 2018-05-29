@@ -24,7 +24,7 @@ internal class Scheduler {
     fun start() {
         lockRun {
             schedulerContext = newSingleThreadContext("slackk-scheduler")
-            tasks.forEach(::startTask)
+            tasks.forEach { it.run(schedulerContext!!) }
         }
     }
 
@@ -38,10 +38,6 @@ internal class Scheduler {
 
     private fun addTask(task: Task) {
         tasks += task
-        startTask(task)
-    }
-
-    private fun startTask(task: Task) {
         lockRun {
             schedulerContext?.let { task.run(it) }
         }
@@ -49,9 +45,7 @@ internal class Scheduler {
 
     private fun lockRun(job: suspend () -> Unit) {
         runBlocking {
-            mutex.withLock {
-                job()
-            }
+            mutex.withLock { job() }
         }
     }
 }
