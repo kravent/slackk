@@ -16,10 +16,10 @@ internal class Scheduler {
     private var schedulerContext: ThreadPoolDispatcher? = null
 
     fun addScheduler(schedule: Schedule, callback: () -> Unit) =
-            addTask(ScheduledTask(schedule, Coroutines.wrapCallback(callback)))
+            addTask(ScheduledTask(schedule, CallbackExecutor.wrapCallback(callback)))
 
     fun addTimer(interval: Long, intervalUnit: TimeUnit, callback: () -> Unit) =
-            addTask(TimedTask(interval, intervalUnit, Coroutines.wrapCallback(callback)))
+            addTask(TimedTask(interval, intervalUnit, CallbackExecutor.wrapCallback(callback)))
 
     fun start() {
         lockRun {

@@ -20,11 +20,11 @@ internal class ApiEventListener(
     val selfUser: String? get() = user
 
     fun onStarted(callback: () -> Unit) {
-        startedListener = Coroutines.wrapCallback(callback)
+        startedListener = CallbackExecutor.wrapCallback(callback)
     }
 
     fun onMessage(callback: (String) -> Unit) {
-        messageListener = Coroutines.wrapCallback(callback)
+        messageListener = CallbackExecutor.wrapCallback(callback)
     }
 
     fun start() {
