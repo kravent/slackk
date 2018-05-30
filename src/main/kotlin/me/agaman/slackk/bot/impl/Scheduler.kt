@@ -1,10 +1,7 @@
 package me.agaman.slackk.bot.impl
 
 import com.github.shyiko.skedule.Schedule
-import kotlinx.coroutines.experimental.ThreadPoolDispatcher
-import kotlinx.coroutines.experimental.cancel
-import kotlinx.coroutines.experimental.newSingleThreadContext
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.sync.Mutex
 import kotlinx.coroutines.experimental.sync.withLock
 import java.util.concurrent.TimeUnit
@@ -13,6 +10,7 @@ internal class Scheduler {
     private val tasks: MutableList<Task> = mutableListOf()
 
     private val mutex = Mutex()
+    private val parentJob = Job()
     private var schedulerContext: ThreadPoolDispatcher? = null
 
     fun addScheduler(schedule: Schedule, callback: () -> Unit) =
@@ -24,23 +22,27 @@ internal class Scheduler {
     fun start() {
         lockRun {
             schedulerContext = newSingleThreadContext("slackk-scheduler")
-            tasks.forEach { it.run(schedulerContext!!) }
+            tasks.forEach { runTask(it) }
         }
     }
 
     fun stop() {
         lockRun {
-            schedulerContext?.cancel()
+            parentJob.cancelAndJoin()
             schedulerContext?.close()
             schedulerContext = null
         }
     }
 
     private fun addTask(task: Task) {
-        tasks += task
         lockRun {
-            schedulerContext?.let { task.run(it) }
+            tasks += task
+            runTask(task)
         }
+    }
+
+    private fun runTask(task: Task) {
+        schedulerContext?.let { task.run(it + parentJob) }
     }
 
     private fun lockRun(job: suspend () -> Unit) {
