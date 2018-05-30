@@ -1,9 +1,11 @@
 package me.agaman.slackk.bot.impl
 
 import com.github.shyiko.skedule.Schedule
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.ThreadPoolDispatcher
+import kotlinx.coroutines.experimental.cancelAndJoin
+import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlinx.coroutines.experimental.sync.Mutex
-import kotlinx.coroutines.experimental.sync.withLock
 import java.util.concurrent.TimeUnit
 
 internal class Scheduler {
@@ -14,20 +16,20 @@ internal class Scheduler {
     private var schedulerContext: ThreadPoolDispatcher? = null
 
     fun addScheduler(schedule: Schedule, callback: () -> Unit) =
-            addTask(ScheduledTask(schedule, CallbackExecutor.wrapCallback(callback)))
+            addTask(ScheduledTask(schedule, AsyncExecutor.wrapCallback(callback)))
 
     fun addTimer(interval: Long, intervalUnit: TimeUnit, callback: () -> Unit) =
-            addTask(TimedTask(interval, intervalUnit, CallbackExecutor.wrapCallback(callback)))
+            addTask(TimedTask(interval, intervalUnit, AsyncExecutor.wrapCallback(callback)))
 
     fun start() {
-        lockRun {
+        AsyncExecutor.lockRun(mutex) {
             schedulerContext = newSingleThreadContext("slackk-scheduler")
             tasks.forEach { runTask(it) }
         }
     }
 
     fun stop() {
-        lockRun {
+        AsyncExecutor.lockRun(mutex) {
             parentJob.cancelAndJoin()
             schedulerContext?.close()
             schedulerContext = null
@@ -35,7 +37,7 @@ internal class Scheduler {
     }
 
     private fun addTask(task: Task) {
-        lockRun {
+        AsyncExecutor.lockRun(mutex) {
             tasks += task
             runTask(task)
         }
@@ -43,11 +45,5 @@ internal class Scheduler {
 
     private fun runTask(task: Task) {
         schedulerContext?.let { task.run(it + parentJob) }
-    }
-
-    private fun lockRun(job: suspend () -> Unit) {
-        runBlocking {
-            mutex.withLock { job() }
-        }
     }
 }

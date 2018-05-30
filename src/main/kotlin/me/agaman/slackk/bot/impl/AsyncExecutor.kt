@@ -2,9 +2,12 @@ package me.agaman.slackk.bot.impl
 
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.sync.Mutex
+import kotlinx.coroutines.experimental.sync.withLock
 import mu.KotlinLogging
 
-internal object CallbackExecutor {
+internal object AsyncExecutor {
     private val slackkCoroutineContext = newSingleThreadContext("slackk")
     private val logger = KotlinLogging.logger {}
 
@@ -16,6 +19,12 @@ internal object CallbackExecutor {
             job()
         } catch (t: Throwable) {
             logger.error(t) { "Error thrown in Slackk callback" }
+        }
+    }
+
+    fun lockRun(mutex: Mutex, job: suspend () -> Unit) {
+        runBlocking {
+            mutex.withLock { job() }
         }
     }
 }
