@@ -19,7 +19,7 @@ class BotEventListener(
             .getSubTypesOf(Event::class.java)
             .map { Pair(it, it.getAnnotation(EventType::class.java)) }
             .filter { (_, annotation) -> annotation != null }
-            .groupBy { (_, annotation) -> annotation.value }
+            .groupBy { (_, annotation) -> getEventTypeId(annotation) }
             .mapValues {(_, classes) -> classes.sortedBy { (_, annotation) -> annotation.priority }.last().first }
 
     private var startListeners: MutableList<() -> Unit> = mutableListOf()
@@ -57,11 +57,17 @@ class BotEventListener(
 
 
     private fun mapToEvent(jsonEventData: String) : Event {
-        val type = gson.fromJson(jsonEventData, EventTypeReader::class.java).type
-        return eventClassForType[type]?.let { gson.fromJson(jsonEventData, it) } ?: UnknownEvent(type, jsonEventData)
+        val type = gson.fromJson(jsonEventData, EventTypeData::class.java)
+        return eventClassForType[type.eventTypeId]?.let { gson.fromJson(jsonEventData, it) } ?: UnknownEvent(type.type, type.subtype, jsonEventData)
     }
 
-    private data class EventTypeReader(
-            val type: String
-    )
+    private data class EventTypeData(
+            val type: String,
+            val subtype: String? = null
+    ) {
+        val eventTypeId: String get() = "$type:${subtype.orEmpty()}"
+    }
+
+    private fun getEventTypeId(annotation: EventType) =
+            "${annotation.type}:${annotation.subtype}"
 }
