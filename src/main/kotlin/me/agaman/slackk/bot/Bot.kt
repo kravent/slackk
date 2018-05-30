@@ -20,10 +20,6 @@ class Bot(
 
     val selfUser get() = eventListener.selfUser
 
-    init {
-        eventListener.addStartListener { scheduler.start() }
-    }
-
     inline fun <reified T : Any> send(request: Request<T>) : Result<T> = send(request, T::class)
     @PublishedApi
     internal fun <T : Any> send(request: Request<T>, resultClass: KClass<T>) : Result<T> = client.send(request, resultClass)
@@ -39,6 +35,7 @@ class Bot(
     fun addTimer(secondsInterval: Long, intervalUnit: TimeUnit, task: () -> Unit) = scheduler.addTimer(secondsInterval, intervalUnit, task)
 
     fun start() {
+        scheduler.start()
         eventListener.start()
     }
     fun stop() {
