@@ -35,7 +35,7 @@ internal class ApiEventListener(
         messageListener = AsyncExecutor.wrapCallback(callback)
     }
 
-    fun start() {
+    fun start(isRestart: Boolean = false) {
         val rtmResult = botClient.send(RtmConnectRequest()).get()
         user = rtmResult.self.id
 
@@ -43,7 +43,7 @@ internal class ApiEventListener(
                 .url(rtmResult.url)
                 .build()
         val listener = WebSocketListenerWrapper(
-                onOpen = { startedListener?.let { it() } },
+                onOpen = { if(!isRestart) startedListener?.let { it() } },
                 onMessage = { text -> messageListener?.let { it(text) } },
                 onClosed = { reason -> logger.info { "Connection closed with reason: $reason" } },
                 onFailure = { t, _ -> failureRestart(t) }
@@ -61,7 +61,7 @@ internal class ApiEventListener(
             delay(60, TimeUnit.SECONDS)
             try {
                 logger.info { "Restarting WebSocket 60 seconds after failure" }
-                start()
+                start(isRestart = true)
             } catch (t: Throwable) {
                 failureRestart(t)
             }
