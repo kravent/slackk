@@ -2,7 +2,7 @@ package me.agaman.slackk.bot.impl
 
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 import me.agaman.slackk.bot.BotClient
 import me.agaman.slackk.bot.request.RtmConnectRequest
 import mu.KotlinLogging
@@ -35,37 +35,40 @@ internal class ApiEventListener(
         messageListener = AsyncExecutor.wrapCallback(callback)
     }
 
-    fun start(isRestart: Boolean = false) {
-        val rtmResult = botClient.send(RtmConnectRequest()).get()
-        user = rtmResult.self.id
+    fun start() {
+        var connectionFinishedOk = false
+        var reconnections = 0
 
-        val request = Request.Builder()
-                .url(rtmResult.url)
-                .build()
-        val listener = WebSocketListenerWrapper(
-                onOpen = { if(!isRestart) startedListener?.let { it() } },
-                onMessage = { text -> messageListener?.let { it(text) } },
-                onClosed = { reason -> logger.info { "Connection closed with reason: $reason" } },
-                onFailure = { t, _ -> failureRestart(t) }
-        )
-        webSocket = httpClient.newWebSocket(request, listener)
+        while (!connectionFinishedOk) {
+            try {
+                val rtmResult = botClient.send(RtmConnectRequest()).get()
+                user = rtmResult.self.id
+
+                val request = Request.Builder()
+                        .url(rtmResult.url)
+                        .build()
+                val listener = WebSocketListenerWrapper(
+                        onOpen = { if (reconnections == 0) startedListener?.let { it() } },
+                        onMessage = { text -> messageListener?.let { it(text) } },
+                        onClosed = { reason -> logger.info { "Connection closed with reason: $reason" } },
+                        onFailure = { t, _ -> throw t }
+                )
+                webSocket = httpClient.newWebSocket(request, listener)
+
+                connectionFinishedOk = true
+            } catch (t: Throwable) {
+                logger.error(t) { "WebScket connection failure" }
+                reconnections += 1
+
+                runBlocking { delay(60, TimeUnit.SECONDS) }
+
+                logger.info { "Restarting WebSocket 60 seconds after failure" }
+            }
+        }
     }
 
     fun stop() {
         webSocket?.close(1000, "Close")
-    }
-
-    private fun failureRestart(t: Throwable) {
-        logger.error(t) { "WebScket connection failure" }
-        launch {
-            delay(60, TimeUnit.SECONDS)
-            try {
-                logger.info { "Restarting WebSocket 60 seconds after failure" }
-                start(isRestart = true)
-            } catch (t: Throwable) {
-                failureRestart(t)
-            }
-        }
     }
 
     private data class UrlResponse(
