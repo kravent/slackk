@@ -40,24 +40,24 @@ internal class ApiEventListener(
         var reconnections = 0
 
         while (!connectionFinishedOk) {
-            try {
-                val rtmResult = botClient.send(RtmConnectRequest()).get()
-                user = rtmResult.self.id
+            val rtmResult = botClient.send(RtmConnectRequest()).get()
+            user = rtmResult.self.id
 
-                val request = Request.Builder()
-                        .url(rtmResult.url)
-                        .build()
-                val listener = WebSocketListenerWrapper(
-                        onOpen = { if (reconnections == 0) startedListener?.let { it() } },
-                        onMessage = { text -> messageListener?.let { it(text) } },
-                        onClosed = { reason -> logger.info { "Connection closed with reason: $reason" } },
-                        onFailure = { t, _ -> throw t }
-                )
-                webSocket = httpClient.newWebSocket(request, listener)
+            val request = Request.Builder()
+                    .url(rtmResult.url)
+                    .build()
+            val listener = WebSocketListenerWrapper(
+                    onOpen = { if (reconnections == 0) startedListener?.let { it() } },
+                    onMessage = { text -> messageListener?.let { it(text) } },
+                    onClosed = { reason ->
+                        connectionFinishedOk = true
+                        logger.info { "Connection closed with reason: $reason" }
+                    },
+                    onFailure = { t, _ -> logger.error(t) { "WebScket connection failure" } }
+            )
+            webSocket = httpClient.newWebSocket(request, listener)
 
-                connectionFinishedOk = true
-            } catch (t: Throwable) {
-                logger.error(t) { "WebScket connection failure" }
+            if (!connectionFinishedOk) {
                 reconnections += 1
 
                 runBlocking { delay(60, TimeUnit.SECONDS) }
