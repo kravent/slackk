@@ -11,6 +11,6 @@ data class User(
         val teamId: String,
         val color: String,
         @SerializedName("is_bot")
-        val isBot: Boolean
-
+        val isBot: Boolean,
+        val profile: UserProfile
 )
