@@ -1,7 +1,9 @@
 package me.agaman.slackk.bot.result
 
-data class ApiTestResult(
+import me.agaman.slackk.bot.data.File
+
+data class FileUploadResult(
         val ok: Boolean,
         val error: String? = null,
-        val args: Map<String, Any> = emptyMap()
+        val file: File? = null
 )
