@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName
 
 data class UserProfile(
         @SerializedName("status_text")
-        val statusText: String?,
+        val statusText: String,
         @SerializedName("status_emoji")
-        val statusEmoji: String?,
+        val statusEmoji: String,
         @SerializedName("real_name")
         val realName: String,
         @SerializedName("display_name")
