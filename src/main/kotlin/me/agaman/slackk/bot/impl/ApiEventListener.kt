@@ -13,6 +13,8 @@ import org.http4k.websocket.Websocket
 import org.http4k.websocket.WsStatus
 import java.util.concurrent.TimeUnit
 
+private const val RECONNECTION_SLEEP_SECONDS = 10L
+
 internal class ApiEventListener(
         token: String
 ) {
@@ -78,8 +80,8 @@ internal class ApiEventListener(
             }
 
             reconnections += 1
-            logger.info { "Waiting 60 seconds before WebSocket reconnection" }
-            runBlocking { delay(60, TimeUnit.SECONDS) }
+            logger.info { "Waiting $RECONNECTION_SLEEP_SECONDS seconds before WebSocket reconnection" }
+            runBlocking { delay(RECONNECTION_SLEEP_SECONDS, TimeUnit.SECONDS) }
             logger.info { "Restarting WebSocket" }
         }
 
