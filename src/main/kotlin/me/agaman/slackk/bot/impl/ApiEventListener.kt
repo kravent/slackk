@@ -92,7 +92,4 @@ internal class ApiEventListener(
         webSocket?.close(WsStatus.NORMAL)
     }
 
-    private data class UrlResponse(
-            val url: String
-    )
 }
