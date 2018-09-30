@@ -14,11 +14,13 @@ internal object AsyncExecutor {
     inline fun wrapCallback(crossinline job: () -> Unit) = { runCallback(job) }
     inline fun <reified T> wrapCallback(crossinline job: (T) -> Unit) = { param: T -> runCallback { job(param) } }
 
-    inline fun runCallback(crossinline job: () -> Unit) = launch(slackkCoroutineContext) {
+    inline fun runCallback(crossinline job: () -> Unit) = launch(slackkCoroutineContext) { safeRun { job() } }
+
+    inline fun safeRun(errorMessage: String = "Error thrown in Slackk callback", crossinline job: () -> Unit) {
         try {
             job()
         } catch (t: Throwable) {
-            logger.error(t) { "Error thrown in Slackk callback" }
+            logger.error(t) { errorMessage }
         }
     }
 

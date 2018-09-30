@@ -5,14 +5,16 @@ import me.agaman.slackk.bot.event.Event
 import me.agaman.slackk.bot.event.EventType
 import me.agaman.slackk.bot.event.UnknownEvent
 import me.agaman.slackk.bot.impl.ApiEventListener
+import me.agaman.slackk.bot.impl.AsyncExecutor
+import mu.KotlinLogging
 import org.reflections.Reflections
+
+val gson = Gson()
 
 class BotEventListener(
         token: String
 ) {
-    companion object {
-        private val gson = Gson()
-    }
+    private val logger = KotlinLogging.logger {}
 
     private val apiEventListener = ApiEventListener(token)
     private val eventClassForType: Map<String, Class<out Event>> = Reflections("me.agaman.slackk")
@@ -26,10 +28,12 @@ class BotEventListener(
     private var eventListeners: MutableList<(Event) -> Unit> = mutableListOf()
 
     init {
-        apiEventListener.onStarted { startListeners.forEach { it() } }
+        apiEventListener.onStarted { startListeners.forEach { job ->
+            AsyncExecutor.safeRun("Error thrown in start listener") { job() } }
+        }
         apiEventListener.onMessage { jsonEventData ->
             val event = mapToEvent(jsonEventData)
-            eventListeners.forEach { it(event) }
+            eventListeners.forEach { job -> AsyncExecutor.safeRun("Error thrown in event listener") { job(event) } }
         }
     }
 
