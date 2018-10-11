@@ -1,6 +1,5 @@
 package me.agaman.slackk.bot.request
 
-import com.google.gson.annotations.SerializedName
 import me.agaman.slackk.bot.result.FileUploadResult
 
 data class FileUploadRequest(
@@ -9,8 +8,16 @@ data class FileUploadRequest(
         val channels: String? = null,
         val filename: String? = null,
         val filetype: String? = null,
-        @SerializedName("initial_comment")
         val initialComment: String? = null,
-        @SerializedName("thread_ts")
         val threadTs: String? = null
-) : Request<FileUploadResult>("files.upload")
+) : FormRequest<FileUploadResult>("files.upload") {
+    override fun formData(): Map<String, String?> = mapOf(
+            "content" to content,
+            "title" to title,
+            "channels" to channels,
+            "filename" to filename,
+            "filetype" to filetype,
+            "initial_comment" to initialComment,
+            "thread_ts" to threadTs
+    )
+}
