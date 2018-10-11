@@ -1,5 +1,7 @@
 package me.agaman.slackk.bot.event
 
+import com.google.gson.annotations.SerializedName
+
 @EventType("im_created")
 data class ImCreatedEvent(
         val user: String,
@@ -10,12 +12,18 @@ data class ImCreatedEvent(
         val id: String,
         val user: String,
         val created: Int,
-        val is_im: Boolean,
-        val is_org_shared: Boolean,
-        val last_read: String,
+        @SerializedName("is_im")
+        val isIm: Boolean,
+        @SerializedName("is_org_shared")
+        val isOrgShared: Boolean,
+        @SerializedName("last_read")
+        val lastRead: String,
         //val latest: XXXX,
-        val unread_count: Int,
-        val unread_count_display: Int,
-        val is_open: Boolean
+        @SerializedName("unread_count")
+        val unreadCount: Int,
+        @SerializedName("unread_count_display")
+        val unreadCountDisplay: Int,
+        @SerializedName("is_open")
+        val isOpen: Boolean
     )
 }
