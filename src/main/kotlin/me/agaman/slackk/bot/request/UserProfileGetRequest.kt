@@ -1,10 +1,10 @@
 package me.agaman.slackk.bot.request
 
 import com.google.gson.annotations.SerializedName
-import me.agaman.slackk.bot.result.UserProfileResult
+import me.agaman.slackk.bot.result.UserProfileGetResult
 
-data class UserProfileGet (
+data class UserProfileGetRequest (
         val user: String,
         @SerializedName("include_labels")
         val includeLabels: Boolean? = null
-) : Request<UserProfileResult>("users.profile.get")
+) : Request<UserProfileGetResult>("users.profile.get")
