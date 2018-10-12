@@ -1,6 +1,5 @@
-package me.agaman.slackk.bot.request
+package me.agaman.slackk.bot.request.base
 
-// TODO avoid serializing this fields
 open class Request<ResultClass : Any>(
         @Transient
         private val _requestMethod: String

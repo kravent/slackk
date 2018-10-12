@@ -6,7 +6,7 @@ import me.agaman.slackk.bot.event.Event
 import me.agaman.slackk.bot.event.MessageChangedEvent
 import me.agaman.slackk.bot.event.MessageEvent
 import me.agaman.slackk.bot.request.PostMessageRequest
-import me.agaman.slackk.bot.request.Request
+import me.agaman.slackk.bot.request.base.Request
 import me.agaman.slackk.bot.result.PostMessageResult
 import me.agaman.slackk.bot.result.Result
 import java.util.concurrent.TimeUnit

@@ -1,5 +1,6 @@
 package me.agaman.slackk.bot.request
 
+import me.agaman.slackk.bot.request.base.Request
 import me.agaman.slackk.bot.result.ApiTestResult
 
 data class ApiTestRequest(

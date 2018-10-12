@@ -3,7 +3,7 @@ package me.agaman.slackk.bot
 import me.agaman.slackk.bot.event.Event
 import me.agaman.slackk.bot.impl.Scheduler
 import me.agaman.slackk.bot.impl.TimeZonedSchedule
-import me.agaman.slackk.bot.request.Request
+import me.agaman.slackk.bot.request.base.Request
 import me.agaman.slackk.bot.result.Result
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass

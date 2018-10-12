@@ -2,8 +2,8 @@ package me.agaman.slackk.bot
 
 import com.google.gson.Gson
 import me.agaman.slackk.bot.impl.ApiClient
-import me.agaman.slackk.bot.request.FormRequest
-import me.agaman.slackk.bot.request.Request
+import me.agaman.slackk.bot.request.base.FormRequest
+import me.agaman.slackk.bot.request.base.Request
 import me.agaman.slackk.bot.result.Result
 import kotlin.reflect.KClass
 

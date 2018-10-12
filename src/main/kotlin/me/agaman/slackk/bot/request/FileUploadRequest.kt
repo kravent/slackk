@@ -1,5 +1,6 @@
 package me.agaman.slackk.bot.request
 
+import me.agaman.slackk.bot.request.base.FormRequest
 import me.agaman.slackk.bot.result.FileUploadResult
 
 data class FileUploadRequest(
