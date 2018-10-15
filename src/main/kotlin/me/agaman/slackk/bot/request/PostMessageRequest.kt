@@ -11,5 +11,9 @@ data class PostMessageRequest(
         @SerializedName("as_user")
         val asUser: Boolean? = null,
         val attachments: List<Attachment>? = null,
-        val mrkdwn: Boolean? = null
+        val mrkdwn: Boolean? = null,
+        @SerializedName("thread_ts")
+        val threadTs: String? = null,
+        @SerializedName("reply_broadcast")
+        val replyBroadcast: Boolean? = null
 ) : Request<PostMessageResult>("chat.postMessage")
