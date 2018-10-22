@@ -19,11 +19,11 @@ internal class ApiClient(
                 .bodyString()
     }
 
-    fun callForm(method: String, data: Map<String, String>): String {
+    fun callForm(method: String, data: Map<String, String?>): String {
         var request = Request(Method.POST, "https://slack.com/api/$method")
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .form("token", token)
-        data.forEach { key, value -> request = request.form(key, value) }
+        data.forEach { key, value -> value?.also { request = request.form(key, it) } }
         return httpClient(request)
                 .bodyString()
     }

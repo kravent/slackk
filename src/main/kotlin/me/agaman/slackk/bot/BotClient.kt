@@ -21,7 +21,7 @@ class BotClient(
     @PublishedApi
     internal fun <T : Any> send(request: Request<T>, resultClass: KClass<T>) : Result<T> {
         val result = if (request is FormRequest<T>) {
-            apiClient.callForm(request.requestMethod(), request.formData().filterValues { it != null } as Map<String, String>)
+            apiClient.callForm(request.requestMethod(), request.formData())
         } else {
             apiClient.call(request.requestMethod(), gson.toJson(request))
         }
