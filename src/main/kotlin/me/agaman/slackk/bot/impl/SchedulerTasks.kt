@@ -1,8 +1,8 @@
 package me.agaman.slackk.bot.impl
 
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 internal interface Task {
     fun run(context: CoroutineContext): Job

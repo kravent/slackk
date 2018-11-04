@@ -1,15 +1,14 @@
 package me.agaman.slackk.bot.impl
 
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newSingleThreadContext
-import kotlinx.coroutines.experimental.runBlocking
-import kotlinx.coroutines.experimental.sync.Mutex
-import kotlinx.coroutines.experimental.sync.withLock
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import mu.KotlinLogging
+import java.util.concurrent.Executors
 
 internal object AsyncExecutor {
     private val slackkCoroutineContext = newSingleThreadContext("slackk")
+    private val slackkCoroutineContext2 = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     private val logger = KotlinLogging.logger {}
 
     inline fun wrapCallback(crossinline job: () -> Unit) = { runCallback(job) }

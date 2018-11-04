@@ -1,9 +1,9 @@
 package me.agaman.slackk.bot.impl
 
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
-import kotlinx.coroutines.experimental.sync.Mutex
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
 import me.agaman.slackk.bot.BotClient
 import me.agaman.slackk.bot.request.RtmConnectRequest
 import mu.KotlinLogging

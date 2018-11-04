@@ -1,10 +1,10 @@
 package me.agaman.slackk.bot.impl
 
-import kotlinx.coroutines.experimental.ExecutorCoroutineDispatcher
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.cancelAndJoin
-import kotlinx.coroutines.experimental.newSingleThreadContext
-import kotlinx.coroutines.experimental.sync.Mutex
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.sync.Mutex
 import java.util.concurrent.TimeUnit
 
 internal class Scheduler {

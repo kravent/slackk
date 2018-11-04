@@ -1,7 +1,7 @@
 package me.agaman.slackk.bot.impl
 
 import com.github.shyiko.skedule.Schedule
-import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.delay
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
