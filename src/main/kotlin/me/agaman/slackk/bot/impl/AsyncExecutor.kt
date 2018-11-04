@@ -7,8 +7,7 @@ import mu.KotlinLogging
 import java.util.concurrent.Executors
 
 internal object AsyncExecutor {
-    private val slackkCoroutineContext = newSingleThreadContext("slackk")
-    private val slackkCoroutineContext2 = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private val slackkCoroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher() + CoroutineName("slackk")
     private val logger = KotlinLogging.logger {}
 
     inline fun wrapCallback(crossinline job: () -> Unit) = { runCallback(job) }
