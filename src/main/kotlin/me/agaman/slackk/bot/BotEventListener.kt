@@ -1,21 +1,16 @@
 package me.agaman.slackk.bot
 
-import com.google.gson.Gson
 import me.agaman.slackk.bot.event.Event
 import me.agaman.slackk.bot.event.EventType
 import me.agaman.slackk.bot.event.UnknownEvent
+import me.agaman.slackk.bot.helper.Serializer
 import me.agaman.slackk.bot.impl.ApiEventListener
 import me.agaman.slackk.bot.impl.AsyncExecutor
-import mu.KotlinLogging
 import org.reflections.Reflections
-
-val gson = Gson()
 
 class BotEventListener(
         token: String
 ) {
-    private val logger = KotlinLogging.logger {}
-
     private val apiEventListener = ApiEventListener(token)
     private val eventClassForType: Map<String, Class<out Event>> = Reflections("me.agaman.slackk")
             .getSubTypesOf(Event::class.java)
@@ -61,8 +56,8 @@ class BotEventListener(
 
 
     private fun mapToEvent(jsonEventData: String) : Event {
-        val type = gson.fromJson(jsonEventData, EventTypeData::class.java)
-        return eventClassForType[type.eventTypeId]?.let { gson.fromJson(jsonEventData, it) } ?: UnknownEvent(type.type, type.subtype, jsonEventData)
+        val type = Serializer.fromJson<EventTypeData>(jsonEventData)
+        return eventClassForType[type.eventTypeId]?.let { Serializer.fromJson(jsonEventData, it) } ?: UnknownEvent(type.type, type.subtype, jsonEventData)
     }
 
     private data class EventTypeData(

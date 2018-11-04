@@ -1,6 +1,6 @@
 package me.agaman.slackk.bot
 
-import com.google.gson.Gson
+import me.agaman.slackk.bot.helper.Serializer
 import me.agaman.slackk.bot.impl.ApiClient
 import me.agaman.slackk.bot.request.base.FormRequest
 import me.agaman.slackk.bot.request.base.Request
@@ -10,10 +10,6 @@ import kotlin.reflect.KClass
 class BotClient(
         token: String
 ) {
-    companion object {
-        private val gson = Gson()
-    }
-
     private val apiClient = ApiClient(token)
 
     inline fun <reified T : Any> send(request: Request<T>) : Result<T> = send(request, T::class)
@@ -23,12 +19,12 @@ class BotClient(
         val result = if (request is FormRequest<T>) {
             apiClient.callForm(request.requestMethod(), request.formData())
         } else {
-            apiClient.call(request.requestMethod(), gson.toJson(request))
+            apiClient.call(request.requestMethod(), Serializer.toJson(request))
         }
 
-        val resultStatus = gson.fromJson(result, ResultStatus::class.java)
+        val resultStatus = Serializer.fromJson<ResultStatus>(result)
         return if (resultStatus.ok) {
-            Result.success(gson.fromJson(result, resultClass.java))
+            Result.success(Serializer.fromJson(result, resultClass.java))
         } else {
             Result.error(resultStatus.error)
         }
