@@ -24,7 +24,7 @@ data class TimeZonedSchedule(
         suspend fun sleepUntilNext() {
             val sleepSeconds = secondsUntilNext()
             if (sleepSeconds > 0) {
-                delay(sleepSeconds, TimeUnit.SECONDS)
+                delay(TimeUnit.SECONDS.toMillis(sleepSeconds))
             }
         }
     }

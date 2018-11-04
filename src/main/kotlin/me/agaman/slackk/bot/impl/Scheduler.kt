@@ -1,7 +1,7 @@
 package me.agaman.slackk.bot.impl
 
+import kotlinx.coroutines.experimental.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.ThreadPoolDispatcher
 import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlinx.coroutines.experimental.sync.Mutex
@@ -12,7 +12,7 @@ internal class Scheduler {
 
     private val mutex = Mutex()
     private val parentJob = Job()
-    private var schedulerContext: ThreadPoolDispatcher? = null
+    private var schedulerContext: ExecutorCoroutineDispatcher? = null
 
     fun addScheduler(schedule: TimeZonedSchedule, callback: () -> Unit) =
             addTask(ScheduledTask(schedule, AsyncExecutor.wrapCallback(callback)))

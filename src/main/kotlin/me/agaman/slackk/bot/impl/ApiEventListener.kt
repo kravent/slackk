@@ -81,7 +81,7 @@ internal class ApiEventListener(
 
             reconnections += 1
             logger.info { "Waiting $RECONNECTION_SLEEP_SECONDS seconds before WebSocket reconnection" }
-            runBlocking { delay(RECONNECTION_SLEEP_SECONDS, TimeUnit.SECONDS) }
+            runBlocking { delay(TimeUnit.SECONDS.toMillis(RECONNECTION_SLEEP_SECONDS)) }
             logger.info { "Restarting WebSocket" }
         }
 

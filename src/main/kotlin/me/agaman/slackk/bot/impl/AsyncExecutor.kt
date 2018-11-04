@@ -1,5 +1,6 @@
 package me.agaman.slackk.bot.impl
 
+import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlinx.coroutines.experimental.runBlocking
@@ -14,7 +15,7 @@ internal object AsyncExecutor {
     inline fun wrapCallback(crossinline job: () -> Unit) = { runCallback(job) }
     inline fun <reified T> wrapCallback(crossinline job: (T) -> Unit) = { param: T -> runCallback { job(param) } }
 
-    inline fun runCallback(crossinline job: () -> Unit) = launch(slackkCoroutineContext) { safeRun { job() } }
+    inline fun runCallback(crossinline job: () -> Unit) = GlobalScope.launch(slackkCoroutineContext) { safeRun { job() } }
 
     inline fun safeRun(errorMessage: String = "Error thrown in Slackk callback", crossinline job: () -> Unit) {
         try {
