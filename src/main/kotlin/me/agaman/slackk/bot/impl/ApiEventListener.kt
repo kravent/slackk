@@ -21,14 +21,14 @@ internal class ApiEventListener(
     private val botClient = BotClient(token)
 
     private var webSocket: Websocket? = null
-    private var user: String? = null
 
     private var startedListener: (() -> Job)? = null
     private var messageListener: ((String) -> Job)? = null
 
     private val logger = KotlinLogging.logger {}
 
-    val selfUser: String? get() = user
+    var user: String? = null
+        private set
 
     fun onStarted(callback: () -> Unit) {
         startedListener = AsyncExecutor.wrapCallback(callback)
