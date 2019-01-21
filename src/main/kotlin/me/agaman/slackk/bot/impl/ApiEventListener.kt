@@ -3,21 +3,22 @@ package me.agaman.slackk.bot.impl
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.sync.Mutex
 import me.agaman.slackk.bot.BotClient
 import me.agaman.slackk.bot.request.RtmConnectRequest
 import mu.KotlinLogging
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.WebSocket
+import org.http4k.client.WebsocketClient
+import org.http4k.core.Uri
+import org.http4k.websocket.Websocket
+import org.http4k.websocket.WsStatus
 import java.util.concurrent.TimeUnit
 
 internal class ApiEventListener(
         token: String
 ) {
     private val botClient = BotClient(token)
-    private val httpClient = OkHttpClient()
 
-    private var webSocket: WebSocket? = null
+    private var webSocket: Websocket? = null
     private var user: String? = null
 
     private var startedListener: (() -> Job)? = null
@@ -40,35 +41,53 @@ internal class ApiEventListener(
         var reconnections = 0
 
         while (!connectionFinishedOk) {
-            val rtmResult = botClient.send(RtmConnectRequest()).get()
-            user = rtmResult.self.id
+            try {
+                val mutex = Mutex(true)
 
-            val request = Request.Builder()
-                    .url(rtmResult.url)
-                    .build()
-            val listener = WebSocketListenerWrapper(
-                    onOpen = { if (reconnections == 0) startedListener?.let { it() } },
-                    onMessage = { text -> messageListener?.let { it(text) } },
-                    onClosed = { reason ->
+                val rtmResult = botClient.send(RtmConnectRequest()).get()
+                user = rtmResult.self.id
+
+                val ws = WebsocketClient.nonBlocking(uri = Uri.of(rtmResult.url), onConnect = {
+                    if (reconnections == 0)
+                        startedListener?.let { it() }
+                })
+                ws.onMessage { wsMessage ->
+                    messageListener?.let { it(wsMessage.bodyString()) }
+                }
+                ws.onClose { wsStatus ->
+                    if (wsStatus == WsStatus.NORMAL) {
+                        logger.info { "Connection closed with reason: $wsStatus" }
                         connectionFinishedOk = true
-                        logger.info { "Connection closed with reason: $reason" }
-                    },
-                    onFailure = { t, _ -> logger.error(t) { "WebScket connection failure" } }
-            )
-            webSocket = httpClient.newWebSocket(request, listener)
+                    } else {
+                        logger.error { "Connection closed with reason: $wsStatus" }
+                    }
+                    mutex.unlock()
+                }
+                ws.onError { t ->
+                    logger.error(t) { "WebSocket error" }
+                }
 
-            if (!connectionFinishedOk) {
-                reconnections += 1
+                webSocket = ws
 
-                runBlocking { delay(60, TimeUnit.SECONDS) }
+                runBlocking { mutex.lock() }
 
-                logger.info { "Restarting WebSocket 60 seconds after failure" }
+                if (connectionFinishedOk)
+                    break
+            } catch (t: Throwable) {
+                logger.error(t) { "WebSocket connection error" }
             }
+
+            reconnections += 1
+            logger.info { "Waiting 60 seconds before WebSocket reconnection" }
+            runBlocking { delay(60, TimeUnit.SECONDS) }
+            logger.info { "Restarting WebSocket" }
         }
+
+        webSocket = null
     }
 
     fun stop() {
-        webSocket?.close(1000, "Close")
+        webSocket?.close(WsStatus.NORMAL)
     }
 
     private data class UrlResponse(

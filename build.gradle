@@ -22,7 +22,9 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile 'com.squareup.okhttp3:okhttp:3.10.0'
+    compile group: "org.http4k", name: "http4k-core", version: "3.28.0"
+    compile group: "org.http4k", name: "http4k-client-apache", version: "3.28.0"
+    compile group: "org.http4k", name: "http4k-client-websocket", version: "3.28.0"
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.github.shyiko.skedule:skedule:0.3.0'
     compile 'org.reflections:reflections:0.9.11'

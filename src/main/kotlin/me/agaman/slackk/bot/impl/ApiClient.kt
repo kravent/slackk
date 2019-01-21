@@ -1,25 +1,20 @@
 package me.agaman.slackk.bot.impl
 
-import okhttp3.MediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
+import org.http4k.client.ApacheClient
+import org.http4k.core.Method
+import org.http4k.core.Request
 
 internal class ApiClient(
         private val token: String
 ) {
-    private val httpClient = OkHttpClient()
+    private val httpClient = ApacheClient()
 
     fun call(method: String, jsonData: String = ""): String {
-        val url = "https://slack.com/api/$method"
-        val request = Request.Builder()
-                .url(url)
+        val request = Request(Method.POST, "https://slack.com/api/$method")
                 .header("Authorization", "Bearer $token")
-                .post(RequestBody.create(MediaType.parse("application/json"), jsonData))
-                .build()
-        return httpClient.newCall(request)
-                .execute()
-                .body()!!
-                .string()
+                .header("Content-Type", "application/json")
+                .body(jsonData)
+        return httpClient(request)
+                .bodyString()
     }
 }
