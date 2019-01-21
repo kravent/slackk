@@ -2,7 +2,6 @@ package me.agaman.slackk.bot.event
 
 import com.google.gson.annotations.SerializedName
 
-@EventType("message")
 data class MessageEvent(
         val channel: String,
         val user: String,

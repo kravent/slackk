@@ -3,7 +3,6 @@ package me.agaman.slackk.bot.event
 import com.google.gson.annotations.SerializedName
 import me.agaman.slackk.bot.data.Item
 
-@EventType("reaction_added")
 data class ReactionAddedEvent(
         val user: String,
         val item: Item,

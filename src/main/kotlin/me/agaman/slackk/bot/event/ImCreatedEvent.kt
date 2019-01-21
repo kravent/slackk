@@ -2,7 +2,6 @@ package me.agaman.slackk.bot.event
 
 import com.google.gson.annotations.SerializedName
 
-@EventType("im_created")
 data class ImCreatedEvent(
         val user: String,
         val event_ts: String,
