@@ -5,10 +5,19 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import mu.KotlinLogging
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 
 internal object AsyncExecutor {
-    private val slackkCoroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher() + CoroutineName("slackk")
+    private val DAEMON_THREAD_FACTORY = ThreadFactory {
+        Executors.defaultThreadFactory()
+                .newThread(it)
+                .apply { isDaemon = true }
+    }
+
+    private val slackkCoroutineContext = createDaemonSingleThreadExecutor().asCoroutineDispatcher() + CoroutineName("slackk")
     private val logger = KotlinLogging.logger {}
+
+    fun createDaemonSingleThreadExecutor() = Executors.newSingleThreadExecutor(DAEMON_THREAD_FACTORY)
 
     inline fun wrapCallback(crossinline job: () -> Unit) = { runCallback(job) }
     inline fun <reified T> wrapCallback(crossinline job: (T) -> Unit) = { param: T -> runCallback { job(param) } }

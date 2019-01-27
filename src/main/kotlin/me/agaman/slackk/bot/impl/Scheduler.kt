@@ -2,7 +2,6 @@ package me.agaman.slackk.bot.impl
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 internal class Scheduler {
@@ -22,7 +21,7 @@ internal class Scheduler {
 
     fun start() {
         AsyncExecutor.lockRun(mutex) {
-            executorDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+            executorDispatcher = AsyncExecutor.createDaemonSingleThreadExecutor().asCoroutineDispatcher()
             tasks.forEach { runTask(it) }
         }
     }
