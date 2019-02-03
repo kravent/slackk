@@ -1,30 +1,32 @@
 package me.agaman.slackk.bot.impl
 
-import org.http4k.client.ApacheClient
-import org.http4k.core.Method
-import org.http4k.core.Request
-import org.http4k.core.body.form
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.forms.FormDataContent
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.http.ContentType
+import io.ktor.http.Parameters
+import io.ktor.http.content.TextContent
+import io.ktor.http.contentType
+
 
 internal class ApiClient(
         private val token: String
 ) {
-    private val httpClient = ApacheClient()
+    private val client = HttpClient(CIO)
 
-    fun call(method: String, jsonData: String = ""): String {
-        val request = Request(Method.POST, "https://slack.com/api/$method")
-                .header("Authorization", "Bearer $token")
-                .header("Content-Type", "application/json")
-                .body(jsonData)
-        return httpClient(request)
-                .bodyString()
-    }
+    suspend fun call(slackMethod: String, jsonData: String = ""): String =
+            client.post("https://slack.com/api/$slackMethod") {
+                header("Authorization", "Bearer $token")
+                body = TextContent(jsonData, ContentType.Application.Json)
+            }
 
-    fun callForm(method: String, data: Map<String, String?>): String {
-        var request = Request(Method.POST, "https://slack.com/api/$method")
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .form("token", token)
-        data.forEach { key, value -> value?.also { request = request.form(key, it) } }
-        return httpClient(request)
-                .bodyString()
-    }
+    suspend fun callForm(slackMethod: String, data: Map<String, String?>): String =
+            client.post("https://slack.com/api/$slackMethod") {
+                body = FormDataContent(Parameters.build {
+                    append("token", token)
+                    data.forEach { key, value -> value?.also { append(key, value) } }
+                })
+            }
 }
