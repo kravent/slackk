@@ -5,9 +5,10 @@ import me.agaman.slackk.bot.impl.AsyncExecutor
 import me.agaman.slackk.bot.impl.BotApiHandler
 
 class BotEventListener(
-        token: String
+        token: String,
+        private val asyncExecutor: AsyncExecutor = AsyncExecutor()
 ) {
-    private val botApiHandler = BotApiHandler(token)
+    private val botApiHandler = BotApiHandler(token, asyncExecutor)
 
     private var startListeners: MutableList<() -> Unit> = mutableListOf()
     private var eventListeners: MutableList<(Event) -> Unit> = mutableListOf()
@@ -16,10 +17,10 @@ class BotEventListener(
 
     init {
         botApiHandler.onStarted { startListeners.forEach { job ->
-            AsyncExecutor.safeRun("Error thrown in start listener") { job() } }
+            asyncExecutor.safeRun("Error thrown in start listener") { job() } }
         }
         botApiHandler.onEvent { event ->
-            eventListeners.forEach { job -> AsyncExecutor.safeRun("Error thrown in event listener") { job(event) } }
+            eventListeners.forEach { job -> asyncExecutor.safeRun("Error thrown in event listener") { job(event) } }
         }
     }
 

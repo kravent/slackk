@@ -1,6 +1,7 @@
 package me.agaman.slackk.bot
 
 import me.agaman.slackk.bot.event.Event
+import me.agaman.slackk.bot.impl.AsyncExecutor
 import me.agaman.slackk.bot.impl.Scheduler
 import me.agaman.slackk.bot.impl.TimeZonedSchedule
 import me.agaman.slackk.bot.request.base.Request
@@ -9,12 +10,13 @@ import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 class Bot(
-        token: String
+        token: String,
+        asyncExecutor: AsyncExecutor = AsyncExecutor()
 ) {
-    private val scheduler = Scheduler()
+    private val scheduler = Scheduler(asyncExecutor)
 
     @PublishedApi
-    internal val eventListener = BotEventListener(token)
+    internal val eventListener = BotEventListener(token, asyncExecutor)
     @PublishedApi
     internal val client = BotClient(token)
 

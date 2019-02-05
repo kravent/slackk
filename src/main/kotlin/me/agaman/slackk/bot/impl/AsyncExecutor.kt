@@ -7,17 +7,11 @@ import mu.KotlinLogging
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 
-internal object AsyncExecutor {
-    private val DAEMON_THREAD_FACTORY = ThreadFactory {
-        Executors.defaultThreadFactory()
-                .newThread(it)
-                .apply { isDaemon = true }
-    }
-
-    private val slackkCoroutineContext = createDaemonSingleThreadExecutor().asCoroutineDispatcher() + CoroutineName("slackk")
-    private val logger = KotlinLogging.logger {}
-
-    fun createDaemonSingleThreadExecutor() = Executors.newSingleThreadExecutor(DAEMON_THREAD_FACTORY)
+class AsyncExecutor {
+    @PublishedApi
+    internal val slackkCoroutineContext = createDaemonSingleThreadExecutor().asCoroutineDispatcher() + CoroutineName("slackk")
+    @PublishedApi
+    internal val logger = KotlinLogging.logger {}
 
     inline fun wrapCallback(crossinline job: () -> Unit) = { runCallback(job) }
     inline fun <reified T> wrapCallback(crossinline job: (T) -> Unit) = { param: T -> runCallback { job(param) } }
@@ -32,10 +26,14 @@ internal object AsyncExecutor {
         }
     }
 
-    fun lockRun(mutex: Mutex, job: suspend () -> Unit) {
-        runBlocking {
-            mutex.withLock { job() }
+    companion object {
+        private val DAEMON_THREAD_FACTORY = ThreadFactory {
+            Executors.defaultThreadFactory()
+                    .newThread(it)
+                    .apply { isDaemon = true }
         }
+
+        fun createDaemonSingleThreadExecutor() = Executors.newSingleThreadExecutor(DAEMON_THREAD_FACTORY)
     }
 }
 

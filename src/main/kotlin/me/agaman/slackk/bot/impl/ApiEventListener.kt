@@ -16,7 +16,8 @@ import java.util.concurrent.TimeUnit
 private const val RECONNECTION_SLEEP_SECONDS = 10L
 
 internal class ApiEventListener(
-        token: String
+        token: String,
+        private val asyncExecutor: AsyncExecutor = AsyncExecutor()
 ) {
     private val botClient = BotClient(token)
 
@@ -31,11 +32,11 @@ internal class ApiEventListener(
         private set
 
     fun onStarted(callback: () -> Unit) {
-        startedListener = AsyncExecutor.wrapCallback(callback)
+        startedListener = asyncExecutor.wrapCallback(callback)
     }
 
     fun onMessage(callback: (String) -> Unit) {
-        messageListener = AsyncExecutor.wrapCallback(callback)
+        messageListener = asyncExecutor.wrapCallback(callback)
     }
 
     fun start() {

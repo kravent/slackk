@@ -6,9 +6,10 @@ import me.agaman.slackk.bot.event.UnknownEvent
 import me.agaman.slackk.bot.helper.Serializer
 
 internal class BotApiHandler(
-        token: String
+        token: String,
+        asyncExecutor: AsyncExecutor = AsyncExecutor()
 ) {
-    private val apiEventListener = ApiEventListener(token)
+    private val apiEventListener = ApiEventListener(token, asyncExecutor)
 
     private var startedListener: (() -> Unit)? = null
     private var eventListener: ((Event) -> Unit)? = null
