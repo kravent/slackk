@@ -39,11 +39,11 @@ internal class ApiEventListener(
     var user: String? = null
         private set
 
-    fun onStarted(callback: () -> Unit) {
+    fun onStarted(callback: suspend () -> Unit) {
         startedListener = asyncExecutor.wrapCallback(callback)
     }
 
-    fun onMessage(callback: (String) -> Unit) {
+    fun onMessage(callback: suspend (String) -> Unit) {
         messageListener = asyncExecutor.wrapCallback(callback)
     }
 
@@ -75,8 +75,10 @@ internal class ApiEventListener(
                                 }
                             }
                         }
+                    } catch (e: ClosedReceiveChannelException) {
+                        logger.debug(e) { "WebSocket receive channel closed" }
                     } catch (e: CancellationException) {
-                        throw e
+                        logger.debug(e) { "WebSocket cancelled" }
                     } catch (e: Throwable) {
                         logger.error(e) { "WebSocket error" }
                     } finally {

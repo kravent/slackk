@@ -10,13 +10,13 @@ class AsyncExecutor : CoroutineScope {
     override val coroutineContext: CoroutineContext = createDaemonSingleThreadExecutor().asCoroutineDispatcher() + CoroutineName("slackk")
     private val logger = KotlinLogging.logger {}
 
-    inline fun wrapCallback(crossinline job: () -> Unit) = { safeLaunch { job() } }
-    inline fun <reified T> wrapCallback(crossinline job: (T) -> Unit) = { param: T -> safeLaunch { job(param) } }
+    inline fun wrapCallback(crossinline job: suspend () -> Unit) = { safeLaunch { job() } }
+    inline fun <reified T> wrapCallback(crossinline job: suspend (T) -> Unit) = { param: T -> safeLaunch { job(param) } }
 
-    inline fun safeLaunch(errorMessage: String = "Error thrown in Slackk callback", crossinline job: () -> Unit) =
+    inline fun safeLaunch(errorMessage: String = "Error thrown in Slackk callback", crossinline job: suspend () -> Unit) =
             launch { safeRun(errorMessage) { job() } }
 
-    fun safeRun(errorMessage: String = "Error thrown in Slackk callback", job: () -> Unit) {
+    suspend fun safeRun(errorMessage: String = "Error thrown in Slackk callback", job: suspend () -> Unit) {
         try {
             job()
         } catch (t: Throwable) {

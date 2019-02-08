@@ -10,25 +10,25 @@ class BotEventListener(
 ) {
     private val botApiHandler = BotApiHandler(token, asyncExecutor)
 
-    private var startListeners: MutableList<() -> Unit> = mutableListOf()
-    private var eventListeners: MutableList<(Event) -> Unit> = mutableListOf()
+    private var startListeners: MutableList<suspend () -> Unit> = mutableListOf()
+    private var eventListeners: MutableList<suspend (Event) -> Unit> = mutableListOf()
 
     val selfUser get() = botApiHandler.user
 
     init {
         botApiHandler.onStarted { startListeners.forEach { job ->
-            asyncExecutor.safeRun("Error thrown in start listener") { job() } }
+            asyncExecutor.safeLaunch("Error thrown in start listener") { job() } }
         }
         botApiHandler.onEvent { event ->
-            eventListeners.forEach { job -> asyncExecutor.safeRun("Error thrown in event listener") { job(event) } }
+            eventListeners.forEach { job -> asyncExecutor.safeLaunch("Error thrown in event listener") { job(event) } }
         }
     }
 
-    fun addStartListener(listener: () -> Unit) {
+    fun addStartListener(listener: suspend () -> Unit) {
         startListeners.add(listener)
     }
 
-    inline fun <reified T: Event> addEventListener(crossinline listener: (T) -> Unit) {
+    inline fun <reified T: Event> addEventListener(crossinline listener: suspend (T) -> Unit) {
         addAnyEventListener { event ->
             if (event is T) {
                 listener(event)
@@ -36,7 +36,7 @@ class BotEventListener(
         }
     }
 
-    fun addAnyEventListener(listener: (Event) -> Unit) {
+    fun addAnyEventListener(listener: suspend (Event) -> Unit) {
         eventListeners.add(listener)
     }
 

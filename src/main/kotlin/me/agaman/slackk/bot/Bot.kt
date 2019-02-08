@@ -22,19 +22,19 @@ class Bot(
 
     val selfUser get() = eventListener.selfUser
 
-    inline fun <reified T : Any> send(request: Request<T>) : Result<T> = send(request, T::class)
+    suspend inline fun <reified T : Any> send(request: Request<T>) : Result<T> = send(request, T::class)
     @PublishedApi
-    internal fun <T : Any> send(request: Request<T>, resultClass: KClass<T>) : Result<T> = client.send(request, resultClass)
+    internal suspend fun <T : Any> send(request: Request<T>, resultClass: KClass<T>) : Result<T> = client.send(request, resultClass)
 
-    fun onStart(listener: () -> Unit) = eventListener.addStartListener(listener)
-    inline fun <reified T : Event> onEvent(crossinline listener: (T) -> Unit) = eventListener.addEventListener(listener)
-    fun onAnyEvent(listener: (Event) -> Unit) = eventListener.addAnyEventListener(listener)
+    fun onStart(listener: suspend () -> Unit) = eventListener.addStartListener(listener)
+    inline fun <reified T : Event> onEvent(crossinline listener: suspend (T) -> Unit) = eventListener.addEventListener(listener)
+    fun onAnyEvent(listener: suspend (Event) -> Unit) = eventListener.addAnyEventListener(listener)
 
     /**
      * Reference for schedule values: <a href="https://github.com/shyiko/skedule#format">skedule</a>.
      */
-    fun schedule(schedule: String, task: () -> Unit) = scheduler.addScheduler(TimeZonedSchedule.parse(schedule), task)
-    fun addTimer(secondsInterval: Long, intervalUnit: TimeUnit, task: () -> Unit) = scheduler.addTimer(secondsInterval, intervalUnit, task)
+    fun schedule(schedule: String, task: suspend () -> Unit) = scheduler.addScheduler(TimeZonedSchedule.parse(schedule), task)
+    fun addTimer(secondsInterval: Long, intervalUnit: TimeUnit, task: suspend () -> Unit) = scheduler.addTimer(secondsInterval, intervalUnit, task)
 
     fun start() {
         scheduler.start()

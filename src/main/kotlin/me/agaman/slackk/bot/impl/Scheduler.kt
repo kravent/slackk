@@ -16,10 +16,10 @@ internal class Scheduler(
 
     private val schedulerContext get() = executorDispatcher?.let { it + CoroutineName("slackk-scheduler") }
 
-    fun addScheduler(schedule: TimeZonedSchedule, callback: () -> Unit) =
+    fun addScheduler(schedule: TimeZonedSchedule, callback: suspend () -> Unit) =
             addTask(ScheduledTask(schedule, asyncExecutor.wrapCallback(callback)))
 
-    fun addTimer(interval: Long, intervalUnit: TimeUnit, callback: () -> Unit) =
+    fun addTimer(interval: Long, intervalUnit: TimeUnit, callback: suspend () -> Unit) =
             addTask(TimedTask(interval, intervalUnit, asyncExecutor.wrapCallback(callback)))
 
     fun start() {

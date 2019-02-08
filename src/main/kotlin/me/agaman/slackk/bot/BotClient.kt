@@ -13,16 +13,14 @@ class BotClient(
 ) {
     private val apiClient = ApiClient(token)
 
-    inline fun <reified T : Any> send(request: Request<T>): Result<T> = send(request, T::class)
+    suspend inline fun <reified T : Any> send(request: Request<T>): Result<T> = send(request, T::class)
 
     @PublishedApi
-    internal fun <T : Any> send(request: Request<T>, resultClass: KClass<T>): Result<T> {
-        val result = runBlocking {
-            if (request is FormRequest<T>) {
-                apiClient.callForm(request.requestMethod(), request.formData())
-            } else {
-                apiClient.call(request.requestMethod(), Serializer.toJson(request))
-            }
+    internal suspend fun <T : Any> send(request: Request<T>, resultClass: KClass<T>): Result<T> {
+        val result = if (request is FormRequest<T>) {
+            apiClient.callForm(request.requestMethod(), request.formData())
+        } else {
+            apiClient.call(request.requestMethod(), Serializer.toJson(request))
         }
 
         val resultStatus = Serializer.fromJson<ResultStatus>(result)

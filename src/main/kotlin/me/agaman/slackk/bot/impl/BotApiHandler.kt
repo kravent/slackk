@@ -11,21 +11,21 @@ internal class BotApiHandler(
 ) {
     private val apiEventListener = ApiEventListener(token, asyncExecutor)
 
-    private var startedListener: (() -> Unit)? = null
-    private var eventListener: ((Event) -> Unit)? = null
+    private var startedListener: (suspend () -> Unit)? = null
+    private var eventListener: (suspend (Event) -> Unit)? = null
 
     val user: String? get() = apiEventListener.user
 
     init {
-        apiEventListener.onStarted(::handleStartEvent)
-        apiEventListener.onMessage(::handleMessageEvent)
+        apiEventListener.onStarted{ handleStartEvent() }
+        apiEventListener.onMessage { handleMessageEvent(it) }
     }
 
-    fun onStarted(callback: () -> Unit) {
+    fun onStarted(callback: suspend () -> Unit) {
         startedListener = callback
     }
 
-    fun onEvent(callback: (Event) -> Unit) {
+    fun onEvent(callback: suspend (Event) -> Unit) {
         eventListener = callback
     }
 
@@ -37,11 +37,11 @@ internal class BotApiHandler(
         apiEventListener.stop()
     }
 
-    private fun handleStartEvent() {
+    private suspend fun handleStartEvent() {
         startedListener?.let { it() }
     }
 
-    private fun handleMessageEvent(jsonEventData: String) {
+    private suspend fun handleMessageEvent(jsonEventData: String) {
         val type = Serializer.fromJson<EventTypeData>(jsonEventData)
         val event = EventClassRepository.getClass(type.type, type.subtype)?.let { Serializer.fromJson(jsonEventData, it) }
                 ?: UnknownEvent(type.type, type.subtype, jsonEventData)
