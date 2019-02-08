@@ -1,24 +1,22 @@
 package me.agaman.slackk.bot.impl
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import mu.KotlinLogging
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
+import kotlin.coroutines.CoroutineContext
 
-class AsyncExecutor {
-    @PublishedApi
-    internal val slackkCoroutineContext = createDaemonSingleThreadExecutor().asCoroutineDispatcher() + CoroutineName("slackk")
-    @PublishedApi
-    internal val logger = KotlinLogging.logger {}
+class AsyncExecutor : CoroutineScope {
+    override val coroutineContext: CoroutineContext = createDaemonSingleThreadExecutor().asCoroutineDispatcher() + CoroutineName("slackk")
+    private val logger = KotlinLogging.logger {}
 
-    inline fun wrapCallback(crossinline job: () -> Unit) = { runCallback(job) }
-    inline fun <reified T> wrapCallback(crossinline job: (T) -> Unit) = { param: T -> runCallback { job(param) } }
+    inline fun wrapCallback(crossinline job: () -> Unit) = { safeLaunch { job() } }
+    inline fun <reified T> wrapCallback(crossinline job: (T) -> Unit) = { param: T -> safeLaunch { job(param) } }
 
-    inline fun runCallback(crossinline job: () -> Unit) = GlobalScope.launch(slackkCoroutineContext) { safeRun { job() } }
+    inline fun safeLaunch(errorMessage: String = "Error thrown in Slackk callback", crossinline job: () -> Unit) =
+            launch { safeRun(errorMessage) { job() } }
 
-    inline fun safeRun(errorMessage: String = "Error thrown in Slackk callback", crossinline job: () -> Unit) {
+    fun safeRun(errorMessage: String = "Error thrown in Slackk callback", job: () -> Unit) {
         try {
             job()
         } catch (t: Throwable) {
