@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'me.agaman'
-version '0.1'
+version '0.2-SNAPSHOT'
 
 repositories {
     jcenter()
@@ -80,7 +80,7 @@ publishing {
             }
             groupId 'me.agaman'
             artifactId 'slackk'
-            version '0.1'
+            version '0.2-SNAPSHOT'
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'Slack API implementation in Kotlin')
@@ -104,7 +104,7 @@ bintray {
         licenses = ['GPL-3.0']
         vcsUrl = 'https://github.com/kravent/slackk'
         version {
-            name = '0.1'
+            name = '0.2-SNAPSHOT'
             released  = new Date()
         }
     }
